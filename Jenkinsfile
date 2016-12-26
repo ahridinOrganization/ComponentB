@@ -1,9 +1,14 @@
-echo 'hello from Pipeline'
-node {
-  git url: 'https://github.com/jglick/simple-maven-project-with-tests.git'
-  def mvnHome = tool 'M3'
-  sh "${mvnHome}/bin/mvn -B -Dmaven.test.failure.ignore verify"
-  step([$class: 'ArtifactArchiver', artifacts: '**/target/*.jar', fingerprint: true])
-  input 'Press Enter to continue'
-  step([$class: 'JUnitResultArchiver', testResults: '**/target/surefire-reports/TEST-*.xml'])
+node { // <1>
+    stage('Build') { // <2>
+        sh 'make' // <3>
+    }
+
+    stage('Test') {
+        sh 'make check'
+        junit 'reports/**/*.xml' // <4>
+    }
+
+    stage('Deploy') {
+        sh 'make publish'
+    }
 }
